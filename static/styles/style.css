@@ -1,0 +1,96 @@
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #0a1022;
+        padding: 0;
+        margin: 0;
+        color: #fff;
+        overflow: hidden;
+        font-family: "Maven Pro";
+    }
+
+    body a {
+        color: #809fff;
+    }
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #601ed7;
+}
+
+th {
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #601ed7;
+}
+
+td {
+    font-size: 16px;
+    vertical-align: top;
+}
+tr {
+    background-color: #142a62;
+}
+
+tr.completed {
+    text-decoration: line-through;
+    background-color: rgba(80, 79, 72, 0.19);
+}
+
+.separator-row {
+    height: 1px;
+    background-color: black;
+}
+
+.separator-cell {
+    border-right: 1px solid black;
+}
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #0a1022;
+    z-index: 100;
+}
+
+header nav ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+    background-color: #0a1022;
+    border-bottom: 1px solid #ddd;
+
+}
+
+header nav ul li {
+    margin-right: 20px;
+}
+
+header nav ul li a {
+    text-decoration: none;
+    color: #9323ff;
+    font-weight: bold;
+    padding: 10px;
+    border-bottom: 2px solid transparent;
+    transition: border-bottom-color 0.3s ease;
+}
+
+header nav ul li a:hover {
+    border-bottom-color: #112de0;
+}
+
+.container {
+    margin-top: 60px;
+}
+

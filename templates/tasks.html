@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Задачи</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="../static/styles/style.css">
+  <link rel="stylesheet" href="../static/styles/trello.css">
+</head>
+<body>
+<header>
+  <nav>
+    <ul>
+      <li><a href="/">Главная страница</a></li>
+      <li><a href="/add-request">Создать заявку</a></li>
+      <li><a href="/view-requests">Список заявок</a></li>
+<!--      <li><a href="/tasks">Задачи</a></li>-->
+<!--      <li><a href="/popular-requests">Популярные вопросы</a></li>-->
+<!--      <li><a href="/send-question">Задать вопрос</a></li>-->
+    </ul>
+  </nav>
+</header>
+<h1>Задачи</h1>
+
+<div class="board">
+  <div class="column" id="column-1">
+    <div class="column-header">To Do</div>
+    <div class="column-body">
+      <div class="task" id="task-1">
+        <div class="task-header">Task 1</div>
+        <div class="task-description">Description for Task 1</div>
+        <div class="task-controls">
+          <button class="move-right" onclick="moveRight('task-1')">Move Right</button>
+          <button class="delete" onclick="deleteTask('task-1')">Delete</button>
+        </div>
+      </div>
+      <div class="task" id="task-2">
+        <div class="task-header">Task 2</div>
+        <div class="task-description">Description for Task 2</div>
+        <div class="task-controls">
+          <button class="move-right" onclick="moveRight('task-2')">Move Right</button>
+          <button class="delete" onclick="deleteTask('task-2')">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="column" id="column-2">
+    <div class="column-header">In Progress</div>
+    <div class="column-body">
+      <!-- Tasks in progress -->
+    </div>
+  </div>
+  <div class="column" id="column-3">
+    <div class="column-header">Done</div>
+    <div class="column-body">
+      <!-- Completed tasks -->
+    </div>
+  </div>
+</div>
+
+<script src="/static/scripts/script.js"></script>
+</body>
+</html>
