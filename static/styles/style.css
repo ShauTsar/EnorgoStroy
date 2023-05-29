@@ -92,5 +92,129 @@ header nav ul li a:hover {
 
 .container {
     margin-top: 60px;
+    margin-left: 20px;
+    margin-right: 20px;
 }
+
+#request-list {
+    margin-bottom: 20px;
+}
+button.mini {
+    --glow-color: rgb(217, 176, 255);
+    --glow-spread-color: rgba(191, 123, 255, 0.781);
+    --enhanced-glow-color: rgb(231, 206, 255);
+    --btn-color: rgb(100, 61, 136);
+    border: 0.15em solid var(--glow-color);
+    padding: 0.5em 1.5em;
+    color: var(--glow-color);
+    font-size: 12px;
+    font-weight: bold;
+    background-color: var(--btn-color);
+    border-radius: 0.75em;
+    outline: none;
+    box-shadow: 0 0 0.8em 0.15em var(--glow-color),
+    0 0 3em 0.75em var(--glow-spread-color),
+    inset 0 0 0.6em 0.15em var(--glow-color);
+    text-shadow: 0 0 0.4em var(--glow-color);
+    position: relative;
+    transition: all 0.3s;
+}
+
+button.mini::after {
+    pointer-events: none;
+    content: "";
+    position: absolute;
+    top: 120%;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: var(--glow-spread-color);
+    filter: blur(1.2em);
+    opacity: 0.6;
+    transform: perspective(1.2em) rotateX(35deg) scale(1, 0.6);
+}
+
+button.mini:hover {
+    color: var(--btn-color);
+    background-color: var(--glow-color);
+    box-shadow: 0 0 0.8em 0.15em var(--glow-color),
+    0 0 3em 1.5em var(--glow-spread-color),
+    inset 0 0 0.6em 0.15em var(--glow-color);
+}
+
+button.mini:active {
+    box-shadow: 0 0 0.5em 0.15em var(--glow-color),
+    0 0 2em 1.5em var(--glow-spread-color),
+    inset 0 0 0.4em 0.15em var(--glow-color);
+}
+
+#login-form {
+    background-color: #222;
+    padding: 2em;
+    border-radius: 1em;
+    box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);
+    color: #fff;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+#login-form h2 {
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+#login-form input {
+    display: block;
+    width: 100%;
+    padding: 0.75em;
+    margin-bottom: 1em;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 0.5em;
+    outline: none;
+}
+
+#login-form input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+#login-form button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 0.75em;
+    border: none;
+    background-color: #6d36a8;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 0.5em;
+    outline: none;
+    transition: background-color 0.3s;
+}
+
+#login-form button[type="submit"]:hover {
+    background-color: #4c1f72;
+}
+
+#login-form button[type="submit"]:active {
+    background-color: #34124b;
+}
+.button {
+    color: #1cbbcb;
+    border: 2px solid #8707ff;
+    border-radius: 10px;
+    padding: 10px 25px;
+    background: transparent;
+}
+
+.button:hover {
+    box-shadow: 2px 2px 15px #8707ff inset;
+}
+
+.button:active {
+    box-shadow: 2px 2px 20px #8707ff inset;
+}
+
+
+
 

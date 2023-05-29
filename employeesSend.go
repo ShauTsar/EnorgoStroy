@@ -34,9 +34,6 @@ func main() {
 	router.POST("/mark-as-completed", markRequestAsCompleted)
 	router.GET("/tasks", showTasksPage)
 	router.GET("/send-question", showQuestionPage)
-
-	// Путь для входа
-	router.GET("/login", showLoginPage)
 	router.POST("/login", handleLogin)
 
 	// Middleware для проверки авторизации
@@ -65,10 +62,6 @@ func checkAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func showLoginPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "login.html", nil)
-}
-
 func handleLogin(c *gin.Context) {
 	session := sessions.Default(c)
 	username := c.PostForm("username")
@@ -82,8 +75,7 @@ func handleLogin(c *gin.Context) {
 		c.Redirect(http.StatusSeeOther, "/view-requests")
 
 	} else {
-		// Неверные логин или пароль
-		c.HTML(http.StatusOK, "login.html", gin.H{"Error": "Неверный логин или пароль. Попробуйте еще раз."})
+		c.Redirect(http.StatusSeeOther, "/")
 	}
 }
 
