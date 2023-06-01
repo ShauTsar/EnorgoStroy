@@ -39,7 +39,7 @@ func main() {
 	// Middleware для проверки авторизации
 	router.Use(checkAuthMiddleware())
 
-	router.Run(":8088")
+	router.Run(":80")
 }
 func showQuestionPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "create_question.html", nil)
