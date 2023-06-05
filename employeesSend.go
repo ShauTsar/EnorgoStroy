@@ -18,6 +18,8 @@ const (
 )
 
 func main() {
+	certFile := "./sertificate/__enostr_ru.full.crt"
+	keyFile := "./sertificate/__enostr_ru.key"
 	router := gin.Default()
 
 	// Инициализация хранилища сессий
@@ -39,7 +41,11 @@ func main() {
 	// Middleware для проверки авторизации
 	router.Use(checkAuthMiddleware())
 
-	router.Run(":80")
+	//router.Run(":80")
+	err := router.RunTLS(":443", certFile, keyFile)
+	if err != nil {
+		log.Fatal("Failed to start HTTPS server: ", err)
+	}
 }
 func showQuestionPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "create_question.html", nil)
