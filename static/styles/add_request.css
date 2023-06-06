@@ -6,7 +6,7 @@ h1 {
     margin-top: 80px;
 }
 
-form {
+form.add-request {
     max-width: 400px;
     margin: 0 auto;
     text-align: center;
@@ -16,14 +16,14 @@ form {
     box-shadow: 0 0 1em rgba(0, 0, 0, 0.4);
 }
 
-form label {
+form.add-request label {
     display: block;
     margin-bottom: 0.5em;
     color: #eee;
 }
 
-form input[type="text"],
-form select {
+form.add-request input[type="text"],
+form.add-request select {
     display: block;
     width: 100%;
     padding: 0.75em;
@@ -35,7 +35,7 @@ form select {
     color: #343a40;
 }
 
-form textarea {
+form.add-request textarea {
     width: 100%;
     padding: 0.75em;
     margin-bottom: 1em;
@@ -46,7 +46,7 @@ form textarea {
     color: #343a40;
 }
 
-form input[type="submit"] {
+form.add-request input[type="submit"] {
     display: block;
     width: 100%;
     padding: 0.75em;
@@ -60,7 +60,7 @@ form input[type="submit"] {
     cursor: pointer;
 }
 
-form input[type="submit"]:hover {
+form.add-request input[type="submit"]:hover {
     background-color: #ddd;
 }
 

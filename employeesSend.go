@@ -31,12 +31,13 @@ func main() {
 
 	router.GET("/", showHomePage)
 	router.GET("/add-request", showAddRequestPage)
-	router.POST("/add-request", addRequest)
+	router.POST("/add-request", validateRequestData, addRequest)
 	router.GET("/view-requests", viewRequests)
 	router.POST("/mark-as-completed", markRequestAsCompleted)
 	router.GET("/tasks", showTasksPage)
 	router.GET("/send-question", showQuestionPage)
 	router.POST("/login", handleLogin)
+	router.POST("/loginAddRequest", handleLoginAddRequest)
 
 	// Middleware для проверки авторизации
 	router.Use(checkAuthMiddleware())
@@ -47,6 +48,25 @@ func main() {
 		log.Fatal("Failed to start HTTPS server: ", err)
 	}
 }
+
+func handleLoginAddRequest(c *gin.Context) {
+	session := sessions.Default(c)
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+
+	// Проверка логина и пароля
+	if username == "master" && password == "P@Smaster" {
+		// Авторизация прошла успешно, устанавливаем флаг авторизации в сессии
+		session.Set("authenticated2", true)
+		session.Save()
+		c.Redirect(http.StatusSeeOther, "/add-request")
+
+	} else {
+		session.AddFlash("Неверный логин или пароль")
+		session.Save()
+		c.Redirect(http.StatusSeeOther, "/add-request")
+	}
+}
 func showQuestionPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "create_question.html", nil)
 }
@@ -55,7 +75,6 @@ func showQuestionPage(c *gin.Context) {
 func checkAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
-
 		// Проверяем, авторизован ли пользователь
 		if auth := session.Get("authenticated"); auth != nil && auth.(bool) {
 			c.Next()
@@ -81,13 +100,16 @@ func handleLogin(c *gin.Context) {
 		c.Redirect(http.StatusSeeOther, "/view-requests")
 
 	} else {
-		c.Redirect(http.StatusSeeOther, "/")
+		session.AddFlash("Неверные данные для входа в просмотр заявок")
+		session.Save()
+		c.Redirect(http.StatusSeeOther, "/view-requests")
 	}
 }
 
 func viewRequests(c *gin.Context) {
 	session := sessions.Default(c)
-
+	flashMessages := session.Flashes()
+	session.Save()
 	// Проверяем, авторизован ли пользователь
 	if auth := session.Get("authenticated"); auth != nil && auth.(bool) {
 		category := c.Query("category")
@@ -98,11 +120,13 @@ func viewRequests(c *gin.Context) {
 		c.HTML(http.StatusOK, "view_requests.html", gin.H{
 			"Authenticated": true,
 			"Requests":      requests,
+			"FlashMessages": flashMessages,
 		})
 		return
 	}
 	c.HTML(http.StatusOK, "view_requests.html", gin.H{
 		"Authenticated": false,
+		"FlashMessages": flashMessages,
 	})
 	return
 }
@@ -122,7 +146,22 @@ func showTasksPage(c *gin.Context) {
 }
 
 func showAddRequestPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "add_request.html", nil)
+	session := sessions.Default(c)
+	flashMessages := session.Flashes()
+	session.Save()
+	if auth := session.Get("authenticated2"); auth != nil && auth.(bool) {
+		c.HTML(http.StatusOK, "add_request.html", gin.H{
+			"FlashMessages": flashMessages,
+			"Authenticated": true,
+		})
+		return
+	}
+	c.HTML(http.StatusOK, "add_request.html", gin.H{
+		"Authenticated": false,
+		"FlashMessages": flashMessages,
+	})
+	return
+
 }
 
 func addRequest(c *gin.Context) {
@@ -222,6 +261,27 @@ func getRequestsFromDB(category string) ([]map[string]interface{}, error) {
 
 var data = ""
 
+func validateRequestData(c *gin.Context) {
+	object := c.PostForm("object")
+	department := c.PostForm("department")
+	brigade := c.PostForm("brigade")
+	employees := c.PostForm("employees")
+
+	if object == "" || department == "" || brigade == "" || employees == "" {
+		// Если хотя бы одно поле пустое, отправляем ошибку
+		session := sessions.Default(c)
+		session.AddFlash("Заполните все поля")
+		session.Save()
+		c.Redirect(http.StatusSeeOther, "/add-request")
+		c.Abort()
+		return
+	}
+
+	// Дополнительные проверки и валидации данных, если необходимо
+
+	// Если данные прошли валидацию, продолжаем выполнение следующих обработчиков
+	c.Next()
+}
 func markRequestAsCompleted(c *gin.Context) {
 	// Get the request ID from the form
 	requestID, _ := strconv.Atoi(c.PostForm("requestID"))

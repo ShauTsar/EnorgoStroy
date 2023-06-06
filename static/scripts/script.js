@@ -5,6 +5,9 @@ document.addEventListener("DOMContentLoaded", function() {
         // Показать выбор категории
         document.getElementById("login-form").style.display = "none";
         document.getElementById("request-list").style.display = "block";
+
+        // Автоматическое отправление формы
+        document.getElementById("category-form").submit();
     }
 });
 

@@ -24,9 +24,13 @@
         </ul>
     </nav>
 </header>
+<h1></h1>
+{{ range .FlashMessages }}
+<div class="alert alert-danger">{{ . }}</div>
+{{ end }}
+{{ if .Authenticated }}
 <h1>Создать заявку</h1>
-
-<form action="/add-request" method="post">
+<form action="/add-request" method="post" class="add-request">
     <label for="object">Объект:</label>
     <select id="object" name="object">
         <option value="Мурманск">Мурманск</option>
@@ -63,5 +67,16 @@
 </form>
 
 <script src="/static/scripts/script.js"></script>
+
+{{ else }}
+<div id="login-form">
+    <h2>Авторизация для создания заявки</h2>
+    <form action="/loginAddRequest" method="post">
+        <input type="text" id="username" name="username" placeholder="Логин">
+        <input type="password" id="password" name="password" placeholder="Пароль">
+        <button type="submit" class="mini">Войти</button>
+    </form>
+</div>
+{{ end }}
 </body>
 </html>
