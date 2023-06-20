@@ -11,8 +11,8 @@ body {
 
 .add-request {
     max-width: 500px;
-    margin: 0 auto;
-    background-color: #282c34;
+    margin: 20px auto;
+    background-color: rgba(39, 73, 140, 0.45);
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
@@ -21,7 +21,7 @@ body {
 .add-request label {
     display: block;
     margin-bottom: 10px;
-    color: #eeeeee;
+    color: #0bead6;
     font-size: 16px;
 }
 
@@ -34,7 +34,7 @@ body {
     border-radius: 5px;
     box-sizing: border-box;
     margin-bottom: 15px;
-    background-color: #2d333f;
+    background-color: rgba(44, 54, 68, 0.65);
     color: #fff;
 }
 
@@ -84,7 +84,7 @@ body {
     font-family: "Montserrat", sans-serif;
     background-color: #1f262d;
     border-radius: 5px;
-    color: #fff;
+    color: #1f7985;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
 }
 
@@ -121,7 +121,7 @@ body {
 .daterangepicker .drp-calendar .table-condensed td.start-date,
 .daterangepicker .drp-calendar .table-condensed td.end-date {
     background-color: #4CAF50;
-    color: white;
+    color: #1b5c5e;
 }
 
 .daterangepicker .drp-calendar .table-condensed td.start-date:before,

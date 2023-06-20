@@ -97,3 +97,147 @@ p {
     animation-duration: 2s;
     animation-iteration-count: infinite;
 }
+.card.animated.fade-in.button
+{
+    width: 740px;
+    margin-top: 5px;
+    text-align: center;
+}
+.modal-dark .modal-content {
+    background-color: #000;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+}
+
+.modal-dark .modal-header {
+    border-bottom: none;
+}
+
+.modal-dark .modal-title {
+    font-size: 24px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.modal-dark .close {
+    color: #fff;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.modal-dark .close:hover {
+    opacity: 1;
+}
+
+.modal-dark .modal-body,
+.modal-dark .modal-footer {
+    border-top-color: rgba(255, 255, 255, 0.3);
+}
+
+.modal-dark .modal-body input,
+.modal-dark .modal-body select {
+    background-color: #222;
+    color: #fff;
+}
+
+.modal-dark .btn-primary {
+    background-color: #1abc9c;
+    border-color: #1abc9c;
+}
+
+.modal-dark .btn-primary:hover,
+.modal-dark .btn-primary:focus {
+    background-color: #148f77;
+    border-color: #148f77;
+}
+#login-form {
+    background-color: #222;
+    padding: 2em;
+    border-radius: 1em;
+    box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);
+    color: #fff;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+#login-form h2 {
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+#login-form input {
+    display: block;
+    width: 100%;
+    padding: 0.75em;
+    margin-bottom: 1em;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 0.5em;
+    outline: none;
+}
+
+#login-form input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+#login-form button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 0.75em;
+    border: none;
+    background-color: #6d36a8;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 0.5em;
+    outline: none;
+    transition: background-color 0.3s;
+}
+
+#login-form button[type="submit"]:hover {
+    background-color: #4c1f72;
+}
+
+#login-form button[type="submit"]:active {
+    background-color: #34124b;
+}
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #0a1022;
+    z-index: 100;
+}
+
+header nav ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+    background-color: #0a1022;
+    border-bottom: 1px solid #ddd;
+
+}
+
+header nav ul li {
+    margin-right: 20px;
+}
+
+header nav ul li a {
+    text-decoration: none;
+    color: #9323ff;
+    font-weight: bold;
+    padding: 10px;
+    border-bottom: 2px solid transparent;
+    transition: border-bottom-color 0.3s ease;
+}
+
+header nav ul li a:hover {
+    border-bottom-color: #112de0;
+}
+.container {
+    margin-top: 60px;
+}

@@ -13,6 +13,10 @@
 </head>
 <body>
 <header>
+    {{ range .FlashMessages }}
+    <div class="alert alert-danger">{{ . }}</div>
+    {{ end }}
+    {{ if .Authenticated }}
     <nav>
         <ul>
             <li><a href="/technical-requests">Список заявок</a></li>
@@ -22,10 +26,6 @@
 </header>
 <h1></h1>
 <h1>Просмотр заявок</h1>
-{{ range .FlashMessages }}
-<div class="alert alert-danger">{{ . }}</div>
-{{ end }}
-{{ if .Authenticated }}
 <div id="request-list">
     <h2>Список заявок</h2>
     <form id="filter-form" action="/tech-requests" method="get">

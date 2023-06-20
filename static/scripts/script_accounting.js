@@ -1,4 +1,3 @@
-// Add pulse animation to cards
 const cards = document.querySelectorAll('.card');
 cards.forEach(card => {
     card.addEventListener('mouseover', () => {
@@ -6,5 +5,10 @@ cards.forEach(card => {
     });
     card.addEventListener('mouseout', () => {
         card.classList.remove('pulse-animation');
+    });
+});
+$(document).ready(function() {
+    $("#add-item-button").click(function() {
+        $("#modal-form").modal("show");
     });
 });

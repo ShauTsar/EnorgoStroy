@@ -41,6 +41,7 @@ func main() {
 	router.POST("/add-techRequest", addTechRequestPage)
 	router.POST("/add-request", validateRequestData, addRequest)
 	router.GET("/view-requests", viewRequests)
+	router.POST("/add-technic", addTechnic)
 	router.GET("/tech-requests", viewTechRequests)
 	router.GET("/tech-accounting", showAccountingPage)
 	router.POST("/mark-as-completed", markRequestAsCompleted)
@@ -75,8 +76,45 @@ func main() {
 	select {}
 }
 
+func addTechnic(c *gin.Context) {
+	model := c.PostForm("model")
+	serial_number := c.PostForm("serial-number")
+	status := c.PostForm("status")
+	name := c.PostForm("name")
+	// Подключение к базе данных
+	db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+		fmt.Printf("error: %v", err)
+		return
+	}
+	defer db.Close()
+	// Вставка данных в таблицу requests
+	insertQuery := "INSERT INTO equipment (model, serial_number, status, name) VALUES ($1, $2, $3, $4)"
+	_, err = db.Exec(insertQuery, model, serial_number, status, name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add request"})
+		return
+	}
+	c.Redirect(http.StatusSeeOther, "tech-accounting")
+}
+
 func showAccountingPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "tech_accounting.html", gin.H{})
+	session := sessions.Default(c)
+	flashMessages := session.Flashes()
+	session.Save()
+	if auth := session.Get("authenticated3"); auth != nil && auth.(bool) {
+		c.HTML(http.StatusOK, "tech_accounting.html", gin.H{
+			"Authenticated": true,
+			"FlashMessages": flashMessages,
+		})
+		return
+	}
+	c.HTML(http.StatusOK, "tech_accounting.html", gin.H{
+		"Authenticated": false,
+		"FlashMessages": flashMessages,
+	})
+	return
 }
 
 func doneTech(c *gin.Context) {
