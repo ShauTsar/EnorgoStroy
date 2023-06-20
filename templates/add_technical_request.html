@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Добавить заявку</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/styles/tech.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+</head>
+<body>
+<h1>Создать заявку</h1>
+<form action="/add-techRequest" method="post" class="add-request">
+    <label for="technic">Категория:</label>
+    <select id="technic" name="technic">
+        <option value="Монитор">Монитор</option>
+        <option value="Ноутбук">Ноутбук</option>
+        <option value="Флеш-накопитель">Флеш-накопитель</option>
+        <option value="Другое">Другое</option>
+    </select>
+
+    <label for="characteristic">Характеристики:</label>
+    <textarea id="characteristic" name="characteristic" placeholder="Intel core i5 7400, Geforce GTX 750 ti"></textarea>
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="employment" name="employment">
+        <label class="form-check-label" for="employment">Трудоустройство</label>
+    </div>
+
+    <div id="employmentDate" style="display: none;">
+        <label for="employmentDate">Дата трудоустройства:</label>
+        <input type="text" id="employmentDate" name="employmentDate" placeholder="Выберите дату трудоустройства">
+    </div>
+    <br>
+
+    <label for="deadline" id="deadlineName">Дата:</label>
+    <input type="text" id="deadline" name="deadline" placeholder="Выберите дату">
+
+    <br>
+
+    <div>
+        <label for="location">Где будет получать:</label>
+        <select id="location" name="location" onchange="handleLocationChange()">
+            <option value="office">Офис</option>
+            <option value="object">Объект</option>
+        </select>
+    </div>
+    <br>
+
+    <div id="objectField" style="display: none;">
+        <label for="objectName">Наименование объекта:</label>
+        <input type="text" id="objectName" name="objectName" placeholder="Введите название объекта">
+    </div>
+
+    <br>
+
+    <label for="employee">ФИО получателя:</label>
+    <input type="text" id="employee" name="employee" placeholder="Введите ФИО получателя">
+
+    <br>
+
+    <label for="priority">Приоритет:</label>
+    <select id="priority" name="priority">
+        <option value="Обычный">Обычный</option>
+        <option value="Срочно">Срочно</option>
+    </select>
+
+    <br>
+
+    <button type="submit" class="button">Создать заявку</button>
+</form>
+<script src="/static/scripts/tech.js"></script>
+</body>
+</html>

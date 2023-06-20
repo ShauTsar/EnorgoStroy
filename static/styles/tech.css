@@ -1,0 +1,259 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+body {
+    background: #0a1022;
+    padding: 0;
+    margin: 0;
+    color: #fff;
+    overflow: hidden;
+    font-family: "Montserrat", sans-serif;
+}
+
+.add-request {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: #282c34;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.add-request label {
+    display: block;
+    margin-bottom: 10px;
+    color: #eeeeee;
+    font-size: 16px;
+}
+
+.add-request select,
+.add-request textarea,
+.add-request input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    background-color: #2d333f;
+    color: #fff;
+}
+
+.add-request .form-check-label {
+    color: #eeeeee;
+    padding-left: 5px;
+}
+
+.add-request .button {
+    background-color: #1abc9c;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.add-request .button:hover {
+    background-color: #148f77;
+}
+
+.button {
+    color: #1cbbcb;
+    border: 2px solid #8707ff;
+    border-radius: 10px;
+    padding: 10px 25px;
+    background: transparent;
+}
+
+.button:hover {
+    box-shadow: 2px 2px 15px #8707ff inset;
+}
+
+.button:active {
+    box-shadow: 2px 2px 20px #8707ff inset;
+}
+
+/* Custom styles for datepicker */
+
+.daterangepicker {
+    font-family: "Montserrat", sans-serif;
+    background-color: #1f262d;
+    border-radius: 5px;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.daterangepicker .drp-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.daterangepicker .drp-buttons .cancelBtn {
+    margin-left: 10px;
+}
+
+.daterangepicker .drp-buttons .applyBtn {
+    margin-right: 10px;
+}
+
+.daterangepicker .drp-calendar {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.daterangepicker .drp-calendar .table-condensed th {
+    font-weight: normal;
+}
+
+.daterangepicker .drp-calendar .table-condensed td,
+.daterangepicker .drp-calendar .table-condensed th {
+    padding: 8px;
+    text-align: center;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.in-range,
+.daterangepicker .drp-calendar .table-condensed td.start-date,
+.daterangepicker .drp-calendar .table-condensed td.end-date {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.start-date:before,
+.daterangepicker .drp-calendar .table-condensed td.end-date:before {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.start-date:before {
+    background-color: #fff;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.end-date:before {
+    background-color: white;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.disabled,
+.daterangepicker .drp-calendar .table-condensed td.off {
+    background-color: #e5e5e5;
+    color: #a8a8a8;
+    cursor: not-allowed;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.available:hover {
+    background-color: #d1e9f2;
+    color: #333;
+    cursor: pointer;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.off.available:hover {
+    background-color: #e5e5e5;
+    color: #a8a8a8;
+    cursor: not-allowed;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.today {
+    font-weight: bold;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.range-start,
+.daterangepicker .drp-calendar .table-condensed td.range-end {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.range-start:before,
+.daterangepicker .drp-calendar .table-condensed td.range-end:before {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    width: 8px;
+    height: 8px;
+    background-color: #4CAF50;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.range-start:before {
+    background-color: #f2f2f2;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.range-end:before {
+    background-color: #4CAF50;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.active,
+.daterangepicker .drp-calendar .table-condensed td.active:hover {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.active.start-date,
+.daterangepicker .drp-calendar .table-condensed td.active.end-date {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.active.start-date:before,
+.daterangepicker .drp-calendar .table-condensed td.active.end-date:before {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.active.start-date:before {
+    background-color: #fff;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.active.end-date:before {
+    background-color: white;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.available {
+    background-color: transparent;
+    color: #333;
+    cursor: pointer;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.available:hover {
+    background-color: #d1e9f2;
+    color: #333;
+}
+
+.daterangepicker .drp-calendar .table-condensed td.off.available,
+.daterangepicker .drp-calendar .table-condensed td.off.available:hover {
+    background-color: transparent;
+    color: #a8a8a8;
+    cursor: not-allowed;
+}
+
+.highlight-green {
+    background: linear-gradient(to right, #71d87f, #1abc9c);
+    color: #333;
+}
+
+.highlight-yellow {
+    background: linear-gradient(to right, #fff9c4, #ffeb3b);
+    color: #333;
+}
+
+.highlight-red {
+    background: linear-gradient(to right, #ff616f, #e91e63);
+    color: #fff;
+}
