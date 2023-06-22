@@ -22,7 +22,6 @@
         </ul>
     </nav>
 </header>
-{{ end }}
 <div class="container">
     <h1>Учет техники</h1>
     <div class="add-item">
@@ -76,8 +75,16 @@
         </div>
     </div>
 </div>
-{{ if .Authenticated }}
 <script src="../static/scripts/script_accounting.js"></script>
+{{ else }}
+<div id="login-form">
+    <h2>Авторизация</h2>
+    <form action="/loginAddTechRequest" method="post">
+        <input type="text" id="username" name="username" placeholder="Логин">
+        <input type="password" id="password" name="password" placeholder="Пароль">
+        <button type="submit" class="mini">Войти</button>
+    </form>
+</div>
 {{ end }}
 </body>
 

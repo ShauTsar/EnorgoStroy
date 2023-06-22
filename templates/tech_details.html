@@ -12,6 +12,9 @@
 
 <body>
 <div class="container">
+    <div class="col text-right">
+        <a class="button" href="/tech-accounting">Вернуться к списку</a>
+    </div>
     <h1>Подробности техники</h1>
     <form action="/update-item" method="post" enctype="multipart/form-data">
         <input type="hidden" name="id" value="{{ .Item.ID }}">
