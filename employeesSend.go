@@ -47,10 +47,13 @@ func main() {
 	router.POST("/mark-as-completed", markRequestAsCompleted)
 	router.POST("/tech-done", doneTech)
 	router.GET("/tasks", showTasksPage)
+	router.GET("/tech-details", showDetailsPage)
 	router.GET("/send-question", showQuestionPage)
 	router.POST("/login", handleLogin)
 	router.POST("/loginAddRequest", handleLoginAddRequest)
+	router.POST("/update-item", updateItem)
 	router.POST("/loginAddTechRequest", handleLoginAddTechRequest)
+	router.GET("/download", downloadFile)
 
 	// Middleware для проверки авторизации
 	router.Use(checkAuthMiddleware())
@@ -76,7 +79,173 @@ func main() {
 	select {}
 }
 
+func updateItem(c *gin.Context) {
+	// Получение данных из формы
+	idStr := c.PostForm("id")
+	name := c.PostForm("name")
+	model := c.PostForm("model")
+	serialNumber := c.PostForm("serial-number")
+	details := c.PostForm("details")
+	status := c.PostForm("status")
+	event := c.PostForm("event")
+	eventDate := c.PostForm("event-date")
+	description := c.PostForm("description")
+	filePath := "//10.150.0.30/Work/ScanIT/WebFiles/"
+
+	// Преобразование id в целочисленное значение
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	// Проверка заполнения обязательных полей
+	if event == "" || eventDate == "" {
+		// Обновление значений в таблице equipment
+		db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+			fmt.Printf("error: %v", err)
+			return
+		}
+		defer db.Close()
+		updateQuery := "UPDATE equipment SET model = $1, serial_number = $2, status = $3, name = $4, details = $5 WHERE id = $6"
+		_, err = db.Exec(updateQuery, model, serialNumber, status, name, details, id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update equipment"})
+			return
+		}
+		c.Redirect(http.StatusSeeOther, "/tech-details?id="+idStr)
+		return
+	} else {
+		file, err := c.FormFile("attachment")
+		var attach string
+		if err == nil {
+			fileName := fmt.Sprintf("%d_%s", id, file.Filename)
+			if err := c.SaveUploadedFile(file, filePath+fileName); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save attachment"})
+				return
+			}
+			attach = filePath + fileName
+		}
+		// Сохранение информации о файле и обновление таблицы equipment
+		db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+			fmt.Printf("error: %v", err)
+			return
+		}
+		defer db.Close()
+		insertQuery := "INSERT INTO item_history (item_id, event, date, description, attach) VALUES ($1, $2, $3, $4, $5)"
+		_, err = db.Exec(insertQuery, id, event, eventDate, description, attach)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert into item_history"})
+			return
+		}
+		c.Redirect(http.StatusSeeOther, "/tech-details?id="+idStr)
+		return
+	}
+}
+
+//	func showDetailsPage(c *gin.Context) {
+//		itemID := c.Query("id")
+//
+//		db, err := sql.Open("postgres", dbURL)
+//		if err != nil {
+//			log.Fatal(err)
+//		}
+//		defer db.Close()
+//
+//		var item TechUchet
+//
+//		err = db.QueryRow("SELECT * FROM equipment WHERE id = $1", itemID).Scan(
+//			&item.ID,
+//			&item.Name,
+//			&item.Model,
+//			&item.SerialNumber,
+//			&item.Status,
+//		)
+//		if err != nil {
+//			log.Fatal(err)
+//		}
+//
+//		// Query the history events associated with the item from the history table
+//		rows, err := db.Query("SELECT * FROM item_history WHERE item_id = $1", itemID)
+//		if err != nil {
+//			log.Fatal(err)
+//		}
+//		defer rows.Close()
+//
+//		for rows.Next() {
+//			var event HistoryEvent
+//			if err := rows.Scan(&event.Event, &event.Date, &event.Description); err != nil {
+//				log.Fatal(err)
+//			}
+//			item.History = append(item.History, event)
+//		}
+//		if err := rows.Err(); err != nil {
+//			log.Fatal(err)
+//		}
+//
+//		c.HTML(http.StatusOK, "tech_details.html", gin.H{
+//			"Item": item,
+//		})
+//	}
+func showDetailsPage(c *gin.Context) {
+	itemID := c.Query("id")
+
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	var item TechUchet
+
+	err = db.QueryRow("SELECT e.id, e.name, e.model, e.serial_number, e.status, e.details "+
+		"FROM equipment e "+
+		"WHERE e.id = $1", itemID).Scan(
+		&item.ID,
+		&item.Name,
+		&item.Model,
+		&item.SerialNumber,
+		&item.Status,
+		&item.Details,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rows, err := db.Query("SELECT h.item_id, h.event, h.date, h.description, h.attach "+
+		"FROM item_history h "+
+		"WHERE h.item_id = $1", itemID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var event HistoryEvent
+		if err := rows.Scan(&event.ItemId, &event.Event, &event.Date, &event.Description, &event.Attach); err != nil {
+			log.Fatal(err)
+		}
+		item.History = append(item.History, event)
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	c.HTML(http.StatusOK, "tech_details.html", gin.H{
+		"Item": item,
+	})
+}
+func downloadFile(c *gin.Context) {
+	filePath := c.Query("file")
+	c.File(filePath)
+}
+
 func addTechnic(c *gin.Context) {
+	var details string
 	model := c.PostForm("model")
 	serial_number := c.PostForm("serial-number")
 	status := c.PostForm("status")
@@ -90,8 +259,8 @@ func addTechnic(c *gin.Context) {
 	}
 	defer db.Close()
 	// Вставка данных в таблицу requests
-	insertQuery := "INSERT INTO equipment (model, serial_number, status, name) VALUES ($1, $2, $3, $4)"
-	_, err = db.Exec(insertQuery, model, serial_number, status, name)
+	insertQuery := "INSERT INTO equipment (model, serial_number, status, name, details) VALUES ($1, $2, $3, $4, $5)"
+	_, err = db.Exec(insertQuery, model, serial_number, status, name, details)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add request"})
 		return
@@ -103,9 +272,11 @@ func showAccountingPage(c *gin.Context) {
 	session := sessions.Default(c)
 	flashMessages := session.Flashes()
 	session.Save()
+	tech_accounting, _ := getRequestsFromTechUchetDB()
 	if auth := session.Get("authenticated3"); auth != nil && auth.(bool) {
 		c.HTML(http.StatusOK, "tech_accounting.html", gin.H{
 			"Authenticated": true,
+			"Items":         tech_accounting,
 			"FlashMessages": flashMessages,
 		})
 		return
@@ -115,6 +286,62 @@ func showAccountingPage(c *gin.Context) {
 		"FlashMessages": flashMessages,
 	})
 	return
+}
+
+type TechUchet struct {
+	ID           int
+	Model        string
+	SerialNumber string
+	Status       string
+	Name         string
+	Details      string
+	History      []HistoryEvent
+}
+type HistoryEvent struct {
+	ItemId      int
+	Event       string
+	Date        time.Time
+	Description string
+	Attach      string
+}
+
+func getRequestsFromTechUchetDB() ([]TechUchet, error) {
+	db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	var techUchets []TechUchet
+	query := ""
+	queryParams := []interface{}{}
+	query = "SELECT id, model, serial_number, status, name FROM equipment ORDER BY name ASC"
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(queryParams...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var techUchet TechUchet
+		err := rows.Scan(&techUchet.ID, &techUchet.Model, &techUchet.SerialNumber, &techUchet.Status, &techUchet.Name)
+		if err != nil {
+			return nil, err
+		}
+		techUchets = append(techUchets, techUchet)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return techUchets, nil
 }
 
 func doneTech(c *gin.Context) {

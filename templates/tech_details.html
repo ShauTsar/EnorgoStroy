@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подробности техники</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/styles/details.css">
+    <script src="https://kit.fontawesome.com/afed836c2d.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+<div class="container">
+    <h1>Подробности техники</h1>
+    <form action="/update-item" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="{{ .Item.ID }}">
+        <div class="form-group">
+            <label for="name">Название:</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ .Item.Name }}">
+        </div>
+        <div class="form-group">
+            <label for="model">Модель:</label>
+            <input type="text" class="form-control" id="model" name="model" value="{{ .Item.Model }}">
+        </div>
+        <div class="form-group">
+            <label for="serial-number">Серийный номер:</label>
+            <input type="text" class="form-control" id="serial-number" name="serial-number" value="{{ .Item.SerialNumber }}">
+        </div>
+        <div class="form-group">
+            <label for="details">Дополнительные характеристики:</label>
+            <textarea class="form-control" id="details" name="details">{{ .Item.Details }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="status">Статус:</label>
+            <select class="form-control" id="status" name="status">
+                <option value="В наличии"{{ if eq .Item.Status "В наличии" }} selected{{ end }}>В наличии</option>
+                <option value="Выдан"{{ if eq .Item.Status "Выдан" }} selected{{ end }}>Выдан</option>
+                <option value="В ремонте"{{ if eq .Item.Status "В ремонте" }} selected{{ end }}>В ремонте</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <h3>История:</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Событие</th>
+                    <th>Дата</th>
+                    <th>Описание</th>
+                    <th>Скачать файл</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{ range .Item.History }}
+                <tr>
+                    <td>{{ .Event }}</td>
+                    <td>{{ .Date.Format "02.01.2006" }}</td>
+                    <td>{{ .Description }}</td>
+                    <td>
+                        {{ if ne .Attach "" }}
+                        <a href="/download?file={{ .Attach }}">
+                            <i class="fa-solid fa-file-download" style="color: #ff4d00;"></i>
+                        </a>
+                        {{ end }}
+                    </td>
+                </tr>
+                {{ end }}
+                </tbody>
+            </table>
+        </div>
+        <div class="form-group">
+            <h4>Добавить событие в историю:</h4>
+            <label for="event">Событие:</label>
+            <select class="form-control" id="event" name="event">
+                <option value=""></option>
+                <option value="Покупка">Покупка</option>
+                <option value="Выдача">Выдача</option>
+                <option value="Возврат">Возврат</option>
+                <option value="В ремонт">В ремонт</option>
+            </select>
+            <label for="event-date">Дата:</label>
+            <input type="date" class="form-control" id="event-date" name="event-date">
+            <label for="description">Описание:</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+            <label for="attachment">Прикрепить файл:</label>
+            <label for="attachment" class="attach-file-btn">
+                <i class="fa-solid fa-file-arrow-down fa-bounce" style="color: #ff4d00;"></i>
+                <input type="file" class="form-control" id="attachment" name="attachment">
+            </label>
+        </div>
+        <button type="submit" class="button">Сохранить изменения</button>
+
+    </form>
+</div>
+
+</body>
+
+</html>

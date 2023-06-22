@@ -13,15 +13,16 @@
 </head>
 
 <body>
+{{ if .Authenticated }}
 <header>
-    {{ if .Authenticated }}
     <nav>
         <ul>
-            <li><a href="/technical-requests">Список заявок</a></li>
+            <li><a href="/tech-requests">Список заявок</a></li>
             <li><a href="/tech-accounting">Учет на складе</a></li>
         </ul>
     </nav>
 </header>
+{{ end }}
 <div class="container">
     <h1>Учет техники</h1>
     <div class="add-item">
@@ -29,27 +30,15 @@
             <span class="plus-symbol">&#43;</span>
         </div>
     </div>
+    {{ range .Items }}
     <div class="card animated fade-in">
-        <h2>Ноутбук</h2>
-        <p>Модель: XYZ123</p>
-        <p>Серийный номер: 1234567890</p>
-        <p>Статус: В наличии</p>
-        <a href="#" class="button">Подробнее</a>
+        <h2>{{ .Name }}</h2>
+        <p>Модель: {{ .Model }}</p>
+        <p>Серийный номер: {{ .SerialNumber }}</p>
+        <p>Статус: {{ .Status }}</p>
+        <a href="/tech-details?id={{ .ID }}" class="button">Подробнее</a>
     </div>
-    <div class="card animated fade-in">
-        <h2>Смартфон</h2>
-        <p>Модель: ABC789</p>
-        <p>Серийный номер: 0987654321</p>
-        <p>Статус: В ремонте</p>
-        <a href="#" class="button">Подробнее</a>
-    </div>
-    <div class="card animated fade-in">
-        <h2>Планшет</h2>
-        <p>Модель: DEF456</p>
-        <p>Серийный номер: 5432109876</p>
-        <p>Статус: Продан</p>
-        <a href="#" class="button">Подробнее</a>
-    </div>
+    {{ end }}
 </div>
 
 <div id="modal-form" class="modal modal-dark">
@@ -87,17 +76,9 @@
         </div>
     </div>
 </div>
-{{ else }}
-<div id="login-form">
-    <h2>Авторизация</h2>
-    <form action="/loginAddTechRequest" method="post">
-        <input type="text" id="username" name="username" placeholder="Логин">
-        <input type="password" id="password" name="password" placeholder="Пароль">
-        <button type="submit" class="mini">Войти</button>
-    </form>
-</div>
-{{ end }}
+{{ if .Authenticated }}
 <script src="../static/scripts/script_accounting.js"></script>
+{{ end }}
 </body>
 
 </html>
