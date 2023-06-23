@@ -46,6 +46,7 @@
     <table>
         <thead>
         <tr>
+            <th class="separator-cell">Дата</th>
             <th class="separator-cell">Объект</th>
             <th class="separator-cell">Отдел</th>
             <th class="separator-cell">Бригада</th>
@@ -56,6 +57,7 @@
         <tbody>
         {{ range .Requests }}
         <tr{{ if .completed }} class="completed"{{ end }}>
+        <td class="separator-cell">{{ .date.Format "02.01.2006"  }}</td>
         <td class="separator-cell">{{ .object }}</td>
         <td class="separator-cell">{{ .department }}</td>
         <td class="separator-cell">{{ .brigade }}</td>

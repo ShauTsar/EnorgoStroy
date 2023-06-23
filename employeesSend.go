@@ -19,7 +19,7 @@ import (
 
 const (
 	dbURL          = "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable"
-	backupDir      = "C:\\Backup"
+	backupDir      = "\\10.150.0.30\\Work\\ScanIT\\WebFiles"
 	backupFileName = "backup.sql"
 )
 
@@ -602,7 +602,7 @@ func addRequest(c *gin.Context) {
 	department := c.PostForm("department")
 	brigade := c.PostForm("brigade")
 	employees := c.PostForm("employees")
-
+	date := time.Now()
 	// Подключение к базе данных
 	db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
 	if err != nil {
@@ -614,8 +614,8 @@ func addRequest(c *gin.Context) {
 
 	completed := false
 	// Вставка данных в таблицу requests
-	insertQuery := "INSERT INTO requests (object, department, brigade, employees, completed) VALUES ($1, $2, $3, $4, $5)"
-	_, err = db.Exec(insertQuery, object, department, brigade, employees, completed)
+	insertQuery := "INSERT INTO requests (object, department, brigade, employees, completed, date) VALUES ($1, $2, $3, $4, $5, $6)"
+	_, err = db.Exec(insertQuery, object, department, brigade, employees, completed, date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add request"})
 		return
@@ -639,9 +639,9 @@ func getRequestsFromDB(category string) ([]map[string]interface{}, error) {
 	var query string
 	var queryParams []interface{}
 	if category == "all" {
-		query = "SELECT * FROM requests ORDER BY completed ASC"
+		query = "SELECT * FROM requests ORDER BY date, completed ASC"
 	} else {
-		query = "SELECT * FROM requests WHERE object = $1 ORDER BY completed ASC"
+		query = "SELECT * FROM requests WHERE object = $1 ORDER BY date, completed ASC"
 		queryParams = append(queryParams, category)
 	}
 
