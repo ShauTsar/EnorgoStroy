@@ -639,9 +639,9 @@ func getRequestsFromDB(category string) ([]map[string]interface{}, error) {
 	var query string
 	var queryParams []interface{}
 	if category == "all" {
-		query = "SELECT * FROM requests ORDER BY date, completed ASC"
+		query = "SELECT * FROM requests ORDER BY completed, date ASC"
 	} else {
-		query = "SELECT * FROM requests WHERE object = $1 ORDER BY date, completed ASC"
+		query = "SELECT * FROM requests WHERE object = $1 ORDER BY completed, date ASC"
 		queryParams = append(queryParams, category)
 	}
 
