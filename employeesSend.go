@@ -50,6 +50,7 @@ func main() {
 	router.GET("/tech-details", showDetailsPage)
 	router.GET("/send-question", showQuestionPage)
 	router.POST("/login", handleLogin)
+	router.GET("/logout", logout)
 	router.POST("/loginAddRequest", handleLoginAddRequest)
 	router.POST("/update-item", updateItem)
 	router.POST("/loginAddTechRequest", handleLoginAddTechRequest)
@@ -147,50 +148,6 @@ func updateItem(c *gin.Context) {
 	}
 }
 
-//	func showDetailsPage(c *gin.Context) {
-//		itemID := c.Query("id")
-//
-//		db, err := sql.Open("postgres", dbURL)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//		defer db.Close()
-//
-//		var item TechUchet
-//
-//		err = db.QueryRow("SELECT * FROM equipment WHERE id = $1", itemID).Scan(
-//			&item.ID,
-//			&item.Name,
-//			&item.Model,
-//			&item.SerialNumber,
-//			&item.Status,
-//		)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//
-//		// Query the history events associated with the item from the history table
-//		rows, err := db.Query("SELECT * FROM item_history WHERE item_id = $1", itemID)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//		defer rows.Close()
-//
-//		for rows.Next() {
-//			var event HistoryEvent
-//			if err := rows.Scan(&event.Event, &event.Date, &event.Description); err != nil {
-//				log.Fatal(err)
-//			}
-//			item.History = append(item.History, event)
-//		}
-//		if err := rows.Err(); err != nil {
-//			log.Fatal(err)
-//		}
-//
-//		c.HTML(http.StatusOK, "tech_details.html", gin.H{
-//			"Item": item,
-//		})
-//	}
 func showDetailsPage(c *gin.Context) {
 	itemID := c.Query("id")
 
@@ -532,11 +489,25 @@ func handleLogin(c *gin.Context) {
 		session.Save()
 		c.Redirect(http.StatusSeeOther, "/view-requests")
 
+	} else if username == "master" && password == "P@Smaster" {
+		// Авторизация прошла успешно, устанавливаем флаг авторизации в сессии
+		session.Set("authenticated2", true)
+		session.Save()
+		c.Redirect(http.StatusSeeOther, "/view-requests")
+
 	} else {
 		session.AddFlash("Неверные данные для входа в просмотр заявок")
 		session.Save()
 		c.Redirect(http.StatusSeeOther, "/view-requests")
 	}
+}
+func logout(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Delete("authenticated")
+	session.Delete("authenticated2") // Удаление сессионной переменной "authenticated"
+	session.Save()
+
+	c.Redirect(http.StatusSeeOther, "/view-requests") // Перенаправление на главную страницу или другую страницу по вашему выбору
 }
 
 func viewRequests(c *gin.Context) {
@@ -551,9 +522,19 @@ func viewRequests(c *gin.Context) {
 		// В данном примере создан простой список заявок
 		requests, _ := getRequestsFromDB(category)
 		c.HTML(http.StatusOK, "view_requests.html", gin.H{
-			"Authenticated": true,
-			"Requests":      requests,
-			"FlashMessages": flashMessages,
+			"Authenticated":     true,
+			"Requests":          requests,
+			"FlashMessagesGood": flashMessages,
+		})
+		return
+	} else if auth = session.Get("authenticated2"); auth != nil && auth.(bool) {
+		category := c.Query("category")
+
+		requests, _ := getRequestsFromDB(category)
+		c.HTML(http.StatusOK, "view_requests.html", gin.H{
+			"Authenticated2":    true,
+			"Requests":          requests,
+			"FlashMessagesGood": flashMessages,
 		})
 		return
 	}
@@ -626,7 +607,7 @@ func addRequest(c *gin.Context) {
 	session.AddFlash("Отправка успешно проведена")
 	session.Save()
 
-	c.Redirect(http.StatusSeeOther, "/")
+	c.Redirect(http.StatusSeeOther, "/view-requests")
 }
 
 func getRequestsFromDB(category string) ([]map[string]interface{}, error) {

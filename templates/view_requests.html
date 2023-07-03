@@ -17,6 +17,10 @@
             <li><a href="/">Главная страница</a></li>
             <li><a href="/add-request">Создать заявку</a></li>
             <li><a href="/view-requests">Список заявок</a></li>
+            {{ if or .Authenticated .Authenticated2 }}
+            <li><a href="/logout">Выход</a></li> <!-- Добавлен пункт меню для logout -->
+            {{ end }}
+
 <!--            <li><a href="/tasks">Задачи</a></li>-->
 <!--            <li><a href="/popular-requests">Популярные вопросы</a></li>-->
 <!--            <li><a href="/send-question">Задать вопрос</a></li>-->
@@ -81,6 +85,56 @@
         </tr>
         <tr class="separator-row">
             <td colspan="6"></td>
+        </tr>
+        {{ end }}
+        </tbody>
+    </table>
+</div>
+{{ else if .Authenticated2 }}
+{{ range .FlashMessagesGood }}
+<div class="alert alert-success">{{ . }}</div>
+{{ end }}
+<div id="request-list">
+    <h2>Список заявок</h2>
+    <form id="category-form" action="/view-requests" method="get">
+        <select id="category-select" name="category">
+            <option value="all">Все</option>
+            <option value="Норильск">Норильск</option>
+            <option value="ГПЗ">ГПЗ</option>
+            <option value="Мурманск">Мурманск</option>
+            <option value="Иркутск">Иркутск</option>
+            <option value="НКНХ СИБУР">НКНХ СИБУР</option>
+            <option value="Гыдан">Гыдан</option>
+        </select>
+        <button type="submit" >Показать заявки</button>
+    </form>
+    <table>
+        <thead>
+        <tr>
+            <th class="separator-cell">Дата</th>
+            <th class="separator-cell">Объект</th>
+            <th class="separator-cell">Отдел</th>
+            <th class="separator-cell">Бригада</th>
+            <th>Сотрудники</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ range .Requests }}
+        <tr{{ if .completed }} class="completed"{{ end }}>
+        <td class="separator-cell">{{ .date.Format "02.01.2006"  }}</td>
+        <td class="separator-cell">{{ .object }}</td>
+        <td class="separator-cell">{{ .department }}</td>
+        <td class="separator-cell">{{ .brigade }}</td>
+        <td>
+            <ul>
+                {{ range .employees }}
+                <li>{{ . }}</li>
+                {{ end }}
+            </ul>
+        </td>
+        </tr>
+        <tr class="separator-row">
+            <td colspan="5"></td>
         </tr>
         {{ end }}
         </tbody>
