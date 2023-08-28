@@ -1,0 +1,80 @@
+/* Добавляем шрифт */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+
+/* Стиль страницы answer.html */
+body {
+    background-color: #333;
+    font-family: 'Roboto', sans-serif; /* Используем шрифт Roboto */
+    color: #fff;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    padding: 20px 0;
+}
+
+h2 {
+    text-align: center;
+    margin-top: 20px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+a {
+    text-decoration: none;
+    color: #fff;
+    display: block;
+    padding: 15px;
+    background-color: #444;
+    border: 1px solid #777;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s, transform 0.2s ease-in-out;
+}
+
+a.complete {
+    background-color: rgba(0, 0, 0, 0.1); /* Цвет для вопросов в статусе "complete" */
+    color: #ccc;
+}
+
+a:hover {
+    background-color: #555;
+    color: #00FFFF;
+    text-decoration: none; /* Убираем подчеркивание при наведении */
+    transform: scale(1.02);
+}
+
+/* Форма авторизации админа */
+#login-form {
+    text-align: center;
+    margin-top: 20px;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #777;
+    border-radius: 5px;
+    background-color: #444;
+    color: #fff;
+}
+
+button[type="submit"] {
+    background-color: #ff5722;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}

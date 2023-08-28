@@ -21,6 +21,7 @@ const (
 	dbURL          = "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable"
 	backupDir      = "\\10.150.0.30\\Work\\ScanIT\\WebFiles"
 	backupFileName = "backup.sql"
+	dbUrlForBot    = "postgresql://postgres:NNA2s*123@localhost:5432/botAnswers?sslmode=disable"
 )
 
 func main() {
@@ -45,15 +46,22 @@ func main() {
 	router.GET("/tech-requests", viewTechRequests)
 	router.GET("/tech-accounting", showAccountingPage)
 	router.POST("/mark-as-completed", markRequestAsCompleted)
+	router.POST("/mark-chat-as-completed", markChatAsCompleted)
 	router.POST("/tech-done", doneTech)
 	router.GET("/tasks", showTasksPage)
+	router.GET("/chat/:uniqueID", showUniqueChatPage)
 	router.GET("/tech-details", showDetailsPage)
 	router.GET("/send-question", showQuestionPage)
+	router.POST("/submit-question", submitQuestion)
+	router.POST("/submit-message", submitMessage)
+	router.GET("/answer-question", showAnswerPage)
+	router.POST("/submit-answer", submitAnswer)
 	router.POST("/login", handleLogin)
 	router.GET("/logout", logout)
 	router.POST("/loginAddRequest", handleLoginAddRequest)
 	router.POST("/update-item", updateItem)
 	router.POST("/loginAddTechRequest", handleLoginAddTechRequest)
+	router.POST("/loginChatAdmin", handleLoginChatAdmin)
 	router.GET("/download", downloadFile)
 
 	// Middleware для проверки авторизации
@@ -78,6 +86,467 @@ func main() {
 
 	// Запуск бесконечного цикла для ожидания выполнения задач
 	select {}
+}
+func submitMessage(c *gin.Context) {
+	// Извлечение данных из формы
+	uniqueID := c.PostForm("uniqueID")
+	message := c.PostForm("message")
+	var sender string
+
+	// Определение отправителя сообщения в зависимости от аутентификации
+	session := sessions.Default(c)
+	if auth := session.Get("authenticated5"); auth != nil && auth.(bool) {
+		sender = "Admin"
+	} else {
+		// Отправитель - пользователь
+		// В этом случае, используем Fullname из объекта Question
+		uniqueIDInt, _ := strconv.Atoi(uniqueID)
+		question, err := getQuestionByID(uniqueIDInt)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get question"})
+			return
+		}
+		sender = question.Fullname
+	}
+
+	// Сохранение сообщения и изображения (если есть) в базе данных
+	db, err := sql.Open("postgres", dbUrlForBot)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+		return
+	}
+	defer db.Close()
+
+	tx, err := db.Begin()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start database transaction"})
+		return
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction rolled back"})
+			return
+		}
+	}()
+
+	// Вставка сообщения и получение уникального идентификатора сообщения
+	var messageID int
+	err = tx.QueryRow("INSERT INTO chat_messages (chat_id, message, sender, date) VALUES ($1, $2, $3, $4) RETURNING id",
+		uniqueID, message, sender, time.Now()).Scan(&messageID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert message into chat_messages"})
+		return
+	}
+
+	// Проверка наличия файла (изображения) и сохранение его, если есть
+	image, err := c.FormFile("attachment")
+	if err == nil {
+		// Генерация уникального имени файла
+		uniqueFileName := generateUniqueFileName(messageID, image.Filename)
+		imagePath := fmt.Sprintf("static/images/%s", uniqueFileName)
+
+		// Сохранение изображения
+		err = c.SaveUploadedFile(image, imagePath)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
+			return
+		}
+
+		// Сохранение адреса изображения и связь с конкретным сообщением
+		imageURL := fmt.Sprintf("/static/images/%s", uniqueFileName)
+		_, err = tx.Exec("INSERT INTO message_images (message_id, image_url) VALUES ($1, $2)", messageID, imageURL)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert image into message_images"})
+			return
+		}
+	}
+
+	// Завершение транзакции
+	err = tx.Commit()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	// Перенаправление обратно на страницу чата
+	c.Redirect(http.StatusSeeOther, fmt.Sprintf("/chat/%s", uniqueID))
+}
+
+// ...
+
+// Функция для получения адресов изображений, связанных с чатом
+func getChatImages(chatID string) ([]string, error) {
+	db, err := sql.Open("postgres", dbUrlForBot)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT mi.image_url FROM chat_messages cm INNER JOIN message_images mi ON cm.id = mi.message_id WHERE cm.chat_id = $1", chatID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var imageURLs []string
+	for rows.Next() {
+		var imageURL string
+		err := rows.Scan(&imageURL)
+		if err != nil {
+			return nil, err
+		}
+		imageURLs = append(imageURLs, imageURL)
+	}
+
+	return imageURLs, nil
+}
+
+// Генерация уникального имени файла на основе текущего времени и имени пользователя
+func generateUniqueFileName(userID int, originalFileName string) string {
+	// Генерация уникального имени файла на основе текущего времени и имени пользователя
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	uniqueFileName := fmt.Sprintf("%d_%d_%s", userID, timestamp, originalFileName)
+	return uniqueFileName
+}
+
+func markChatAsCompleted(c *gin.Context) {
+	// Получите question_id из формы
+	questionID := c.PostForm("question_id")
+
+	// Получите адреса изображений, связанных с этим чатом
+	imageURLs, err := getChatImages(questionID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get chat images"})
+		return
+	}
+
+	// Удалите сами файлы
+	for _, imageURL := range imageURLs {
+		err := deleteImage(imageURL)
+		if err != nil {
+			// Log the error for debugging purposes
+			log.Printf("Failed to delete image: %s - %v\n", imageURL, err)
+		}
+	}
+
+	// Обновите статус вопроса на "complete = true"
+	db, err := sql.Open("postgres", dbUrlForBot)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+		return
+	}
+	defer db.Close()
+
+	_, err = db.Exec("UPDATE questions SET complete = true WHERE id = $1", questionID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to mark question as completed"})
+		return
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		log.Printf("Failed to start database transaction: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start database transaction"})
+		return
+	}
+
+	// First, delete records from message_images table associated with chat messages
+	_, err = tx.Exec("DELETE FROM message_images WHERE message_id IN (SELECT id FROM chat_messages WHERE chat_id = $1)", questionID)
+	if err != nil {
+		tx.Rollback()
+		log.Printf("Failed to clear associated message_images records: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear associated message_images records"})
+		return
+	}
+
+	// Now, delete chat messages
+	_, err = tx.Exec("DELETE FROM chat_messages WHERE chat_id = $1", questionID)
+	if err != nil {
+		tx.Rollback()
+		log.Printf("Failed to clear chat messages: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear chat messages"})
+		return
+	}
+
+	// Commit the transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Printf("Failed to commit transaction: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	// Перенаправьте пользователя на страницу с вопросами
+	c.Redirect(http.StatusSeeOther, "/answer-question")
+}
+
+func deleteImage(imageURL string) error {
+	err := os.Remove(imageURL)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type ChatMessage struct {
+	ID      int
+	ChatID  int
+	Message string
+	Date    time.Time
+	Sender  string
+	Images  sql.NullString
+}
+
+func showUniqueChatPage(c *gin.Context) {
+	// Извлечение уникального идентификатора из URL
+	uniqueID := c.Param("uniqueID")
+	session := sessions.Default(c)
+	session.Save()
+	chatID, err := strconv.Atoi(uniqueID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid uniqueID"})
+		return
+	}
+	chatMessages, err := getChatMessages(chatID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch chat messages"})
+		return
+	}
+	question, err := getQuestionByID(chatID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch question"})
+		return
+	}
+
+	var cq ChatMessage
+	Images := chatMessages[0].Images
+	var imagesCount int
+
+	if Images.Valid {
+		// Если значение не NULL, вы можете получить его строковое представление и вычислить длину
+		imagesCount = len(Images.String)
+	} else {
+		// Если значение NULL, установите imagesCount в 0 или любое другое значение по умолчанию
+		imagesCount = 0
+	}
+
+	// Теперь у вас есть imagesCount, который содержит длину строки или 0, если значение NULL
+
+	// Определение отправителя сообщения в зависимости от аутентификации
+	cq.Sender = question.Fullname
+	if auth := session.Get("authenticated5"); auth != nil && auth.(bool) {
+		cq.Sender = "Admin"
+	}
+
+	if auth := session.Get("authenticated5"); auth != nil && auth.(bool) {
+		c.HTML(http.StatusOK, "chat.html", gin.H{
+			"Authenticated": true,
+			"ChatMessages":  chatMessages,
+			"UniqueID":      uniqueID,
+			"QuestionTitle": question.Question,
+			"IsClosed":      question.Complete,
+			"Images":        imagesCount, // Передача списка изображений в шаблон
+		})
+		return
+	}
+	c.HTML(http.StatusOK, "chat.html", gin.H{
+		"ChatMessages":  chatMessages,
+		"UniqueID":      uniqueID,
+		"Authenticated": false,
+		"QuestionTitle": question.Question,
+		"IsClosed":      question.Complete,
+		"Images":        chatMessages[0].Images, // Передача списка изображений в шаблон
+	})
+	return
+}
+
+func getQuestionByID(questionID int) (*Question, error) {
+	db, err := sql.Open("postgres", dbUrlForBot)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	var question Question
+	err = db.QueryRow("SELECT id, fullname, category, question, complete FROM questions WHERE id = $1", questionID).Scan(
+		&question.ID, &question.Fullname, &question.Category, &question.Question, &question.Complete,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &question, nil
+}
+
+func getChatMessages(chatID int) ([]ChatMessage, error) {
+	db, err := sql.Open("postgres", dbUrlForBot)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT cm.id, cm.chat_id, cm.message, cm.date, cm.sender, mi.image_url FROM chat_messages cm LEFT JOIN message_images mi ON cm.id = mi.message_id WHERE cm.chat_id = $1 ORDER BY cm.date ASC", chatID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var chatMessages []ChatMessage
+	for rows.Next() {
+		var cq ChatMessage
+		err := rows.Scan(&cq.ID, &cq.ChatID, &cq.Message, &cq.Date, &cq.Sender, &cq.Images)
+		if err != nil {
+			log.Printf("Error fetching chat messages: %v\n", err)
+			return nil, err
+		}
+
+		chatMessages = append(chatMessages, cq)
+	}
+
+	return chatMessages, nil
+}
+
+func showAnswerPage(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Save()
+	questions, err := getAllQuestions()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch questions"})
+		return
+	}
+	if auth := session.Get("authenticated5"); auth != nil && auth.(bool) {
+		c.HTML(http.StatusOK, "answer.html", gin.H{
+			"Authenticated": true,
+			"Questions":     questions,
+		})
+		return
+	}
+
+	// Передача списка вопросов на страницу
+	c.HTML(http.StatusOK, "answer.html", gin.H{"Questions": questions})
+}
+
+func getAllQuestions() ([]Question, error) {
+	db, err := sql.Open("postgres", dbUrlForBot)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT id, fullname, category, question, complete FROM questions ORDER BY complete ASC, id ASC")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var questions []Question
+	for rows.Next() {
+		var q Question
+		err := rows.Scan(&q.ID, &q.Fullname, &q.Category, &q.Question, &q.Complete)
+		if err != nil {
+			return nil, err
+		}
+		questions = append(questions, q)
+	}
+
+	return questions, nil
+}
+
+func showQuestionPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "question.html", nil)
+}
+
+func submitQuestion(c *gin.Context) {
+	// Получение данных из формы
+	fullname := c.PostForm("fullname")
+	category := c.PostForm("category")
+	question := c.PostForm("question")
+	complete := false
+
+	// Сохранение вопроса в базе данных
+	db, err := sql.Open("postgres", dbUrlForBot)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+		return
+	}
+	defer db.Close()
+
+	tx, err := db.Begin()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start database transaction"})
+		return
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction rolled back"})
+			return
+		}
+	}()
+
+	// Вставка вопроса и получение уникального идентификатора
+	var uniqueID int
+	err = tx.QueryRow("INSERT INTO questions (fullname, category, question, complete) VALUES ($1, $2, $3, $4) RETURNING id",
+		fullname, category, question, complete).Scan(&uniqueID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert question into database"})
+		return
+	}
+
+	// Создайте уникальный URL для страницы чата
+	uniqueURL := fmt.Sprintf("/chat/%d", uniqueID)
+
+	// Вставка сообщения в таблицу chat_messages
+	_, err = tx.Exec("INSERT INTO chat_messages (chat_id, message, sender, date) VALUES ($1, $2, $3, $4)",
+		uniqueID, question, fullname, time.Now())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert message into chat_messages"})
+		return
+	}
+
+	// Завершение транзакции
+	err = tx.Commit()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	// Перенаправьте пользователя на страницу чата с уникальным URL
+	c.Redirect(http.StatusSeeOther, uniqueURL)
+}
+
+type Question struct {
+	ID       int
+	Fullname string
+	Category string
+	Question string
+	Complete bool
+}
+
+func submitAnswer(c *gin.Context) {
+	// Получение данных из формы
+	questionID := c.PostForm("question_id")
+	answer := c.PostForm("answer")
+
+	// Сохранение ответа в базе данных
+	db, err := sql.Open("postgres", dbUrlForBot)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+		return
+	}
+	defer db.Close()
+
+	_, err = db.Exec("UPDATE questions SET answer = $1 WHERE id = $2", answer, questionID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update question with answer"})
+		return
+	}
+
+	// Перенаправьте пользователя на ту же страницу чата
+	uniqueURL := fmt.Sprintf("/chat/%s", questionID)
+	c.Redirect(http.StatusSeeOther, uniqueURL)
 }
 
 func updateItem(c *gin.Context) {
@@ -344,6 +813,24 @@ func handleLoginAddTechRequest(c *gin.Context) {
 		c.Redirect(http.StatusSeeOther, "/tech-requests")
 	}
 }
+func handleLoginChatAdmin(c *gin.Context) {
+	session := sessions.Default(c)
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+
+	// Проверка логина и пароля
+	if username == "admin" && password == "admin" {
+		// Авторизация прошла успешно, устанавливаем флаг авторизации в сессии
+		session.Set("authenticated5", true)
+		session.Save()
+		c.Redirect(http.StatusSeeOther, "/answer-question")
+
+	} else {
+		session.AddFlash("Неверный логин или пароль")
+		session.Save()
+		c.Redirect(http.StatusSeeOther, "/answer-question")
+	}
+}
 
 func viewTechRequests(c *gin.Context) {
 	session := sessions.Default(c)
@@ -457,9 +944,31 @@ func handleLoginAddRequest(c *gin.Context) {
 		c.Redirect(http.StatusSeeOther, "/add-request")
 	}
 }
-func showQuestionPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "create_question.html", nil)
-}
+
+//func submitQuestion(c *gin.Context) {
+//	// Получение данных из формы
+//	fullname := c.PostForm("fullname")
+//	category := c.PostForm("category")
+//	question := c.PostForm("question")
+//	answer := ""
+//
+//	// Сохранение вопроса в базе данных
+//	db, err := sql.Open("postgres", dbUrlForBot)
+//	if err != nil {
+//		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+//		return
+//	}
+//	defer db.Close()
+//
+//	_, err = db.Exec("INSERT INTO questions (fullname, category, question, answer) VALUES ($1, $2, $3, $4)",
+//		fullname, category, question, answer)
+//	if err != nil {
+//		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert question into database"})
+//		return
+//	}
+//
+//	c.HTML(http.StatusOK, "question_success.html", nil)
+//}
 
 // Middleware для проверки авторизации
 func checkAuthMiddleware() gin.HandlerFunc {

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Ответить на вопрос</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="/static/styles/answer_question_style.css">
+</head>
+<body>
+{{ if .Authenticated }}
+<h1>Ответить на вопрос</h1>
+<h2>Выберите вопрос, на который хотите ответить:</h2>
+<ul>
+  {{ range .Questions }}
+  <li>
+    <a href="/chat/{{ .ID }}" class="{{ if .Complete }}complete{{ end }}">
+      {{ .Fullname }}: {{ .Question }}
+      {{ if .Complete }}
+      (Закрыт)
+      {{ end }}
+    </a>
+  </li>
+  {{ end }}
+</ul>
+
+</body>
+{{ else }}
+<div id="login-form">
+  <h2>Авторизация админа</h2>
+  <form action="/loginChatAdmin" method="post">
+    <input type="text" id="username" name="username" placeholder="Логин">
+    <input type="password" id="password" name="password" placeholder="Пароль">
+    <button type="submit" class="mini">Войти</button>
+  </form>
+</div>
+{{ end }}
+</html>

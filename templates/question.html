@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Задать вопрос</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/static/styles/question_style.css">
+</head>
+<body>
+<div class="container">
+    <h1>Задать вопрос</h1>
+    <div class="center-div">
+        <form action="/submit-question" method="POST">
+            <div class="form-group">
+                <label for="fullname">ФИО:</label>
+                <input type="text" class="form-control" id="fullname" name="fullname" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Категория вопроса:</label>
+                <select class="form-control" id="category" name="category" required>
+                    <option value="Вопрос по телеграмм боту">Вопрос по телеграмм боту</option>
+                    <option value="Вопрос по 1с">Вопрос по 1с</option>
+                    <option value="Общий вопрос">Общий вопрос</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="question">Вопрос:</label>
+                <textarea class="form-control" id="question" name="question" rows="6" required></textarea>
+            </div>
+            <button type="submit" class="btn">Отправить вопрос</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

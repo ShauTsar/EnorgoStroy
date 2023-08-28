@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="/static/styles/chat_style.css">
+  <script src="https://kit.fontawesome.com/afed836c2d.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<h1>{{ .QuestionTitle }}</h1>
+{{ if .IsClosed }}
+<div class="closed-message">
+  <p>Вопрос закрыт</p>
+</div>
+{{ else }}
+<div class="chat-container">
+  {{ range .ChatMessages }}
+  <div class="message {{ if eq .Sender "Admin" }} admin-message {{ else }} user-message {{ end }}">
+  <p>{{ .Sender }}:</p>
+  <p>{{ .Message }}</p>
+  <p>{{ .Date.Format "02.01.2006 15:04" }}</p>
+
+  {{ with .Images }}
+  {{ if .Valid }}
+  <div class="images">
+    <img src="{{ .String }}" alt="Image">
+  </div>
+  {{ end }}
+  {{ end }}
+</div>
+{{ end }}
+</div>
+<form method="POST" action="/submit-message" enctype="multipart/form-data">
+  <input type="hidden" name="uniqueID" value="{{ .UniqueID }}">
+  <textarea name="message" rows="3" placeholder="Введите сообщение"></textarea>
+  <label for="attachment">Прикрепить изображение:</label>
+  <label for="attachment" class="attach-file-btn">
+    <i class="fa-solid fa-file-arrow-down fa-bounce" style="color: #ff4d00;"></i>
+    <input type="file" class="form-control" id="attachment" name="attachment">
+  </label>
+  <button type="submit">Отправить</button>
+</form>
+<form method="POST" action="/mark-chat-as-completed">
+  <input type="hidden" name="question_id" value="{{ .UniqueID }}">
+  <button type="submit">Закрыть вопрос</button>
+</form>
+{{ end }}
+</body>
+</html>
