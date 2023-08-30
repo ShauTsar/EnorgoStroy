@@ -13,10 +13,27 @@
 <body>
 <header>
     <nav>
-        <ul>
-            <li><a href="/">Главная страница</a></li>
-            <li><a href="/add-request">Создать заявку</a></li>
-            <li><a href="/view-requests">Список заявок</a></li>
+        <ul class="nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-home"></i> Главная страница
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/add-request">
+                    <i class="fas fa-plus"></i> Создать заявку
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/view-requests">
+                    <i class="fas fa-list"></i> Список заявок
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/show-navigation">
+                    <i class="fas fa-bars"></i> Навигация
+                </a>
+            </li>
         </ul>
     </nav>
 </header>
@@ -24,7 +41,7 @@
     {{ range .FlashMessages }}
     <div class="alert alert-success">{{ . }}</div>
     {{ end }}
-    <h1>Добро пожаловать на главную страницу!</h1>
+    <h1>Добро пожаловать на главную страницу по табелированию в 1с!</h1>
 </div>
 <footer>
     <div class="container">

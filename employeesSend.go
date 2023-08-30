@@ -63,6 +63,7 @@ func main() {
 	router.POST("/loginAddTechRequest", handleLoginAddTechRequest)
 	router.POST("/loginChatAdmin", handleLoginChatAdmin)
 	router.GET("/download", downloadFile)
+	router.GET("/show-navigation", showNavigationPage)
 
 	// Middleware для проверки авторизации
 	router.Use(checkAuthMiddleware())
@@ -86,6 +87,10 @@ func main() {
 
 	// Запуск бесконечного цикла для ожидания выполнения задач
 	select {}
+}
+
+func showNavigationPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "navigation_page.html", gin.H{})
 }
 func submitMessage(c *gin.Context) {
 	// Извлечение данных из формы
