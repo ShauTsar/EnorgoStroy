@@ -18,10 +18,10 @@ import (
 )
 
 const (
-	dbURL          = "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable"
+	dbURL          = "postgresql://postgres:NNA2s*123@localhost:5433/requests?sslmode=disable"
 	backupDir      = "\\10.150.0.30\\Work\\ScanIT\\WebFiles"
 	backupFileName = "backup.sql"
-	dbUrlForBot    = "postgresql://postgres:NNA2s*123@localhost:5432/botAnswers?sslmode=disable"
+	dbUrlForBot    = "postgresql://postgres:NNA2s*123@localhost:5433/botAnswers?sslmode=disable"
 )
 
 func main() {
@@ -577,7 +577,7 @@ func updateItem(c *gin.Context) {
 	// Проверка заполнения обязательных полей
 	if event == "" || eventDate == "" {
 		// Обновление значений в таблице equipment
-		db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
+		db, err := sql.Open("postgres", dbURL)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
 			fmt.Printf("error: %v", err)
@@ -604,7 +604,7 @@ func updateItem(c *gin.Context) {
 			attach = filePath + fileName
 		}
 		// Сохранение информации о файле и обновление таблицы equipment
-		db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
+		db, err := sql.Open("postgres", dbURL)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
 			fmt.Printf("error: %v", err)
@@ -682,7 +682,7 @@ func addTechnic(c *gin.Context) {
 	status := c.PostForm("status")
 	name := c.PostForm("name")
 	// Подключение к базе данных
-	db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
+	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
 		fmt.Printf("error: %v", err)
@@ -737,7 +737,7 @@ type HistoryEvent struct {
 }
 
 func getRequestsFromTechUchetDB() ([]TechUchet, error) {
-	db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
+	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		return nil, err
 	}
@@ -902,7 +902,7 @@ func addTechRequestPage(c *gin.Context) {
 		object = c.PostForm("objectName")
 	}
 	// Подключение к базе данных
-	db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
+	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
 		fmt.Printf("error: %v", err)
@@ -1099,7 +1099,7 @@ func addRequest(c *gin.Context) {
 	employees := c.PostForm("employees")
 	date := time.Now()
 	// Подключение к базе данных
-	db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
+	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
 		fmt.Printf("error: %v", err)
@@ -1125,7 +1125,7 @@ func addRequest(c *gin.Context) {
 }
 
 func getRequestsFromDB(category string) ([]map[string]interface{}, error) {
-	db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
+	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %v", err)
 	}
@@ -1187,7 +1187,7 @@ func getRequestsFromDB(category string) ([]map[string]interface{}, error) {
 	return requests, nil
 }
 func getRequestsFromtechDB(category string) ([]TechRequest, error) {
-	db, err := sql.Open("postgres", "postgresql://postgres:NNA2s*123@localhost:5432/requests?sslmode=disable")
+	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		return nil, err
 	}
